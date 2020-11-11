@@ -3,10 +3,13 @@ const router = Router();
 const BD = require('../config/configdb');
 
 //READ
-router.get('/getAdmin', async (req, res) => {
-    sql = "select * from admin";
+router.post('/getAdmin', async (req, res) => {
+    
+    const { correo, contrasena } = req.body;
+    
+    sql = "select * from admin where correo=:correo";
 
-    let result = await BD.Open(sql, [], false);
+    let result = await BD.Open(sql, [correo], false);
     Users = [];
 
     result.rows.map(user => {
