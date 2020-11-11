@@ -235,6 +235,8 @@ router.post('/getProductos', async (req, res) => {
     res.status(200).json({
         "nombre": nombre
     })
+
+    console.log("se intento registrar producto");
 });
 
 router.get('/getProducto', async (req, res) => {
