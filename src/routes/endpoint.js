@@ -5,11 +5,11 @@ const BD = require('../config/configdb');
 //READ
 router.post('/getAdmin', async (req, res) => {
     
-    const { correo, contrasena } = req.body;
+    const { usuario, contrasena } = req.body;
     
-    sql = "select * from admin where correo=:correo";
+    sql = "select * from admin where usuario=:usuario";
 
-    let result = await BD.Open(sql, [correo], false);
+    let result = await BD.Open(sql, [usuario], false);
     Users = [];
 
     result.rows.map(user => {
@@ -23,8 +23,41 @@ router.post('/getAdmin', async (req, res) => {
         Users.push(userSchema);
     })
 
+    console.log(Users);
+
+    if(Users.usuario==="true"){
+        console.log("usuario no validado");
+    }else {
+        if(Users.contrasena=contrasena){
+            res.status(200).json(Users);
+        }else{
+            console.log("contraseña incorrecta");
+        }
+        console.log("usuario validado");
+    }
+
+});
+
+router.get('/getAdmin', async (req, res) => {
+    
+    sql = "select * from admin";
+
+    let result = await BD.Open(sql, [], false);
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "id_admin": user[0],
+            "nombre": user[1],
+            "usuario": user[2],
+            "contrasena": user[3],
+        }
+
+        Users.push(userSchema);
+    })
     res.json(Users);
 });
+
 
 router.post('/Login', async (req, res) => {
     const { correo, contrasena } = req.body;
