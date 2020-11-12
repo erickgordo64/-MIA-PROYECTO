@@ -75,7 +75,10 @@ router.post('/Login', async (req, res) => {
             "nombre":user[2],
             "apellido":user[3],
             "correo": user[4],
-            "contrasena": user[5],                                                          
+            "contrasena": user[5],
+            "fecha_nacimiento": user[6],
+            "pais": user[7],
+            "foto": user[8],                                                          
             "token":'token'
         }
         Users.push(userSchema);
@@ -226,17 +229,19 @@ router.post('/addCategoria', async (req, res) => {
 
 
 router.post('/getProductos', async (req, res) => {
-    const { nombre, descripcion, precio, id_usuario, id_categoria} = req.body;
+    const { nombre, descripcion, precio, palabras_clave,id_usuario, id_categoria} = req.body;
 
-    sql = "insert into categoria(nombre, descripcion, precio, id_usuario, id_categoria) values (:nombre, :descripcion, :precio, :id_usuario, :id_categoria)";
+    console.log(nombre, id_usuario);
 
-    await BD.Open(sql, [nombre,  descripcion, precio, id_usuario, id_categoria], true);
+    sql = "insert into producto(nombre, descripcion, precio, palabras_clave, id_usuario, id_categoria) values (:nombre, :descripcion, :precio, :palabras_clave,:id_usuario, :id_categoria)";
+
+    await BD.Open(sql, [nombre,  descripcion, precio, palabras_clave,id_usuario, id_categoria], true);
 
     res.status(200).json({
         "nombre": nombre
     })
 
-    console.log("se intento registrar producto");
+    
 });
 
 router.get('/getProducto', async (req, res) => {
@@ -250,7 +255,34 @@ router.get('/getProducto', async (req, res) => {
             "id_producto": user[0],
             "nombre": user[1],
             "descripcion": user[2],
-            "precio": user[3]
+            "precio": user[3],
+            "id_usuario":user[5]
+        }
+
+        Users.push(userSchema);
+    })
+
+    res.status(200).json(Users);
+});
+
+router.get('/getProductos/', async (req, res) => {
+    
+    var id_producto=req.query.id_producto;
+    
+    console.log(id_producto);
+
+    sql = "select * from producto where id_producto=:id_producto";
+
+    let result = await BD.Open(sql, [id_producto], false);
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "id_producto": user[0],
+            "nombre": user[1],
+            "descripcion": user[2],
+            "precio": user[3],
+            "id_usuario":user[5]
         }
 
         Users.push(userSchema);
@@ -280,6 +312,50 @@ router.get('/getProductoLike/', async (req, res) => {
     })
 
     res.status(200).json(Users);
+});
+
+router.get('/getCarrito/', async (req, res) => {
+    var id_usuario = req.query.id_usuario;
+
+    sql = "select carrito.id_producto, producto.nombre, producto.descripcion, producto.precio, carrito.cantidad, producto.id_usuario from producto inner join carrito on carrito.id_producto=producto.id_producto where carrito.id_usuario=:id_usuario";
+
+    console.log(id_usuario);
+
+    let result = await BD.Open(sql, [id_usuario], false);
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "id_producto": user[0],
+            "nombre": user[1],
+            "descripcion": user[2],
+            "precio": user[3],
+            "cantidad": user[4],
+            "id_usuario": user[5]
+        }
+        
+        Users.push(userSchema);
+    })
+
+    console.log(result);
+
+    res.json(Users);
+});
+
+router.post('/addCarrito', async (req, res) => {
+    const { cantidad, id_usuario, id_producto} = req.body;
+
+    console.log(cantidad, id_usuario);
+
+    sql = "insert into carrito(cantidad, id_usuario, id_producto) values (:cantidad, :id_usuario, :id_producto)";
+
+    await BD.Open(sql, [cantidad,id_usuario, id_producto], true);
+
+    res.status(200).json({
+        "cantidad": cantidad
+    })
+
+    
 });
 
 module.exports = router;
